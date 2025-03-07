@@ -18,7 +18,7 @@ services:
       retries: 5
 
   backend:
-    image: verhanasta/kittygram_backend
+    image: valdmar918/kittygram_backend
     env_file: .env
     volumes:
       - static:/backend_static
@@ -29,13 +29,13 @@ services:
 
   frontend:
     env_file: .env
-    image: verhanasta/kittygram_frontend
+    image: valdmar918/kittygram_frontend
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - static:/frontend_static
 
   gateway:
-    image: verhanasta/kittygram_gateway
+    image: valdmar918/kittygram_gateway
     depends_on:
       - backend
     env_file: .env

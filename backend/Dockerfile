@@ -6,7 +6,7 @@ RUN pip install --upgrade pip
 
 COPY requirements.txt .
 
-COPY .env .
+#COPY .env .
 
 RUN pip install -r requirements.txt --no-cache-dir
 

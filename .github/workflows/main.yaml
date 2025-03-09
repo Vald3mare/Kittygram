@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: ["3.8", "3.9", "3.10"]
           cache: 'pip'
       - name: Copy requirements.txt
         run: cp ./backend/requirements.txt ./requirements.txt
@@ -175,4 +175,7 @@ jobs:
         with:
           to: ${{ secrets.CHAT_ID }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "Деплой прошел успешно!"
+          message: |
+            Деплой от ${{ github.actor }}
+            Коммит: ${{ github.event.commits[0].message }}
+            Ссылка: https://github.com/${{ github.repository }}/commit/${{ github.sha }}

@@ -145,6 +145,7 @@ jobs:
           echo "POSTGRES_USER=$POSTGRES_USER" >> .env
           echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env
           echo "DATABASE_URL=$DATABASE_URL" >> .env
+          # тут добавлять?
       - name: Copy .env to the server
         uses: appleboy/scp-action@master
         with:

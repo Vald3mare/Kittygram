@@ -60,7 +60,7 @@ jobs:
           cd frontend/
           npm run test
 
-  build_and_push_to_docker_hub:
+  build_backend_and_push_to_docker_hub:
     name: Push Docker image to DockerHub (Backend)
     runs-on: ubuntu-latest
     needs: tests
@@ -128,7 +128,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs:
-      - build_and_push_to_docker_hub
+      - build_backend_and_push_to_docker_hub
       - build_frontend_and_push_to_docker_hub
       - build_gateway_and_push_to_docker_hub
     steps:
@@ -145,7 +145,6 @@ jobs:
           echo "POSTGRES_USER=$POSTGRES_USER" >> .env
           echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env
           echo "DATABASE_URL=$DATABASE_URL" >> .env
-          # тут добавлять?
       - name: Copy .env to the server
         uses: appleboy/scp-action@master
         with:

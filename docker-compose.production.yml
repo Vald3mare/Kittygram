@@ -5,10 +5,33 @@ volumes:
   static:
   media:
 
+networks:
+  kittygram_network:
+    driver: bridge
+
 services:
-  db:
+  gateway:
+    image: valdmar918/kittygram_gateway
+    container_name: gateway
+    ports:
+      - "80:80"
+      - "8000:80"
+    restart: always
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - kittygram_network
+    volumes:
+      - static:/var/html/backend
+      - media:/var/html/media
+      - media:/app/media/
+      - static:/var/html/static
+  postgres:
     image: postgres:13
+    container_name: postgres
     env_file: .env
+    restart: always
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -16,31 +39,28 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - kittygram_network
 
   backend:
     image: valdmar918/kittygram_backend
+    container_name: backend
+    restart: always
     env_file: .env
+    networks:
+      - kittygram_network
     volumes:
       - static:/backend_static
       - media:/app/media/
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
 
   frontend:
-    env_file: .env
     image: valdmar918/kittygram_frontend
-    command: cp -r /app/build/. /frontend_static/
+    container_name: frontend
+    restart: always
+    networks:
+      - kittygram_network
     volumes:
-      - static:/frontend_static
-
-  gateway:
-    image: valdmar918/kittygram_gateway
-    depends_on:
-      - backend
-    env_file: .env
-    volumes:
-      - static:/staticfiles/
-      - media:/app/media/
-    ports:
-      - "80:80"
+      - static:/app/build

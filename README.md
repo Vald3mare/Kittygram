@@ -26,9 +26,9 @@ dockerhub_username: ваш_логин_на_докерхабе
 
 ## Тест развертывания terraform
 
-![alt text](image.png)
+![alt text](img/image.png)
 
 Демонстрации работы сервиса на новой машине
-![alt text](image-1.png)
-![alt text](image-2.png)
-![alt text](image-3.png)
+![alt text](img/image-1.png)
+![alt text](img/image-2.png)
+![alt text](img/image-3.png)

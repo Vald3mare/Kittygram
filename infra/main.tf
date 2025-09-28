@@ -60,7 +60,7 @@ resource "yandex_compute_instance" "kittygram-vm" {
 
   boot_disk {
     initialize_params {
-      image_id = "fd8ubuntu2foa2hr1332e1" # Ubuntu 22.04 LTS
+      image_id = "fd821bt5q11383b3217s" # Ubuntu 22.04 LTS
       size     = 10
     }
   }

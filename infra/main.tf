@@ -14,6 +14,10 @@ provider "yandex" {
   zone                     = "ru-central1-b"
 }
 
+data "yandex_compute_image" "ubuntu-image" {
+  family = "ubuntu-2204-lts"
+}
+
 resource "yandex_vpc_network" "kittygram-network" {
   name = "kittygram-network"
 }
@@ -59,7 +63,7 @@ resource "yandex_compute_instance" "kittygram-vm" {
 
   boot_disk {
     initialize_params {
-      image_id = "fd8vm252b1d56k17plft" # Ubuntu 22.04 LTS
+      image_id = data.yandex_compute_image.ubuntu-image.id # Ubuntu 22.04 LTS
       size     = 10
     }
   }

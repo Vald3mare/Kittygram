@@ -26,9 +26,8 @@ resource "yandex_vpc_subnet" "kittygram-subnet" {
 }
 
 resource "yandex_vpc_security_group" "kittygram-sg" {
-  name        = "kittygram-sg"
-  description = "Security group for Kittygram application"
-  network_id  = yandex_vpc_network.kittygram-network.id
+  name       = "kittygram-sg"
+  network_id = yandex_vpc_network.kittygram-network.id
 
   egress {
     protocol       = "ANY"

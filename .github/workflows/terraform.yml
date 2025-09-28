@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Terraform Action (plan, apply, or destroy)'
+        description: 'Terraform Action'
         required: true
         default: 'plan'
         type: choice
@@ -31,6 +31,9 @@ jobs:
 
       - name: Terraform Init
         env:
+          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+          YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
+          YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
           AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
         run: terraform -chdir=./infra init
@@ -68,5 +71,5 @@ jobs:
           terraform -chdir=./infra destroy -auto-approve
           -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
           -var="cloud_id=${{ secrets.YC_CLOUD_ID }}"
-          -var="folder_id=${{ secrets.YC_FOLDER_ID }}"
+          -var_folder_id=${{ secrets.YC_FOLDER_ID }}"
           -var="service_account_key_file=${{ steps.create_key_file.outputs.key_path }}"

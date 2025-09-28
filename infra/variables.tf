@@ -1,12 +1,25 @@
-variable "ssh_public_key" {
+variable "vm_name" {
   type        = string
-  description = "Public SSH key for the VM"
+  description = "Virtual machine name"
+  default     = "kittygram-vm"
 }
 
-variable "service_account_key_file" {
+variable "ssh_username" {
   type        = string
-  description = "Path to the Yandex.Cloud service account key file"
+  description = "Username for SSH access"
+  default     = "ubuntu"
 }
+
+variable "ssh_key_content" {
+  type        = string
+  description = "Content of the public SSH key"
+  sensitive   = true
+}
+
+# variable "service_account_key_file" {
+#   type        = string
+#   description = "Path to the Yandex.Cloud service account key file"
+# }
 
 variable "cloud_id" {
   type        = string

@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "yandex" {
-  service_account_key_file = var.service_account_key_file
+  #service_account_key_file = var.service_account_key_file
   cloud_id                 = var.cloud_id
   folder_id                = var.folder_id
   zone                     = "ru-central1-b"
@@ -52,7 +52,7 @@ resource "yandex_vpc_security_group" "kittygram-sg" {
 }
 
 resource "yandex_compute_instance" "kittygram-vm" {
-  name        = "kittygram-vm"
+  name        = var.vm_name
   platform_id = "standard-v1"
   zone        = "ru-central1-b"
 
@@ -75,7 +75,7 @@ resource "yandex_compute_instance" "kittygram-vm" {
   }
 
   metadata = {
-    ssh-keys  = "ubuntu:${var.ssh_public_key}"
+    ssh-keys  = "${var.ssh_username}:${var.ssh_key_content}"
     user-data = file("${path.module}/cloud-config.yaml")
   }
 }

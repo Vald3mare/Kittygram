@@ -16,10 +16,11 @@ variable "ssh_key_content" {
   sensitive   = true
 }
 
-# variable "service_account_key_file" {
-#   type        = string
-#   description = "Path to the Yandex.Cloud service account key file"
-# }
+variable "yc_token" {
+  type        = string
+  description = "Yandex.Cloud service account key JSON"
+  sensitive   = true
+}
 
 variable "cloud_id" {
   type        = string

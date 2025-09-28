@@ -22,15 +22,12 @@ jobs:
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.3.0
 
-      - name: Configure Yandex.Cloud credentials
-        env:
-          YC_TOKEN: ${{ secrets.YC_TOKEN }}
+      - name: Create key.json file
+        id: create_key_file
         run: |
-          mkdir -p ~/.config/yandex-cloud/
-          echo "token: ${YC_TOKEN}" > ~/.config/yandex-cloud/config.yaml
+          echo '${{ secrets.YC_TOKEN }}' > key.json
+          echo "key_path=$(realpath key.json)" >> $GITHUB_OUTPUT
 
       - name: Terraform Init
         env:
@@ -40,25 +37,27 @@ jobs:
 
       - name: Terraform Plan
         if: github.event.inputs.action == 'plan'
-        env:
-          YC_TOKEN: ${{ secrets.YC_TOKEN }}
-          YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
-          YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: terraform -chdir=./infra plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" -var="yc_token=${{ secrets.YC_TOKEN }}" -var="cloud_id=${{ secrets.YC_CLOUD_ID }}" -var="folder_id=${{ secrets.YC_FOLDER_ID }}"
-
+        run: >
+          terraform -chdir=./infra plan
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+          -var="cloud_id=${{ secrets.YC_CLOUD_ID }}"
+          -var="folder_id=${{ secrets.YC_FOLDER_ID }}"
+          -var="service_account_key_file=${{ steps.create_key_file.outputs.key_path }}"
 
       - name: Terraform Apply
         if: github.event.inputs.action == 'apply'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: terraform -chdir=./infra apply -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+        run: >
+          terraform -chdir=./infra apply -auto-approve
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+          -var="cloud_id=${{ secrets.YC_CLOUD_ID }}"
+          -var="folder_id=${{ secrets.YC_FOLDER_ID }}"
+          -var="service_account_key_file=${{ steps.create_key_file.outputs.key_path }}"
 
       - name: Terraform Destroy
         if: github.event.inputs.action == 'destroy'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: terraform -chdir=./infra destroy -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+        run: >
+          terraform -chdir=./infra destroy -auto-approve
+          -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+          -var="cloud_id=${{ secrets.YC_CLOUD_ID }}"
+          -var="folder_id=${{ secrets.YC_FOLDER_ID }}"
+          -var="service_account_key_file=${{ steps.create_key_file.outputs.key_path }}"

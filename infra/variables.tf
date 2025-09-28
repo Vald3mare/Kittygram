@@ -3,10 +3,9 @@ variable "ssh_public_key" {
   description = "Public SSH key for accessing the VM"
 }
 
-variable "yc_token" {
+variable "service_account_key_file" {
   type        = string
-  description = "Yandex.Cloud static access key"
-  sensitive   = true
+  description = "Path to the Yandex.Cloud service account key file"
 }
 
 variable "cloud_id" {

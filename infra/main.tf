@@ -1,0 +1,80 @@
+terraform {
+  required_providers {
+    yandex = {
+      source = "yandex-cloud/yandex"
+      version = ">= 0.89.0"
+    }
+  }
+}
+
+provider "yandex" {
+  zone = "ru-central1-b"
+  cloud_id = var.cloud_id
+  folder_id = var.folder_id
+  service_account_key_file = var.service_account_key_file
+}
+
+resource "yandex_vpc_network" "kittygram-network" {
+  name = "kittygram-network"
+}
+
+resource "yandex_vpc_subnet" "kittygram-subnet" {
+  name           = "kittygram-subnet"
+  zone           = "ru-central1-b"
+  network_id     = yandex_vpc_network.kittygram-network.id
+  v4_cidr_blocks = ["192.168.10.0/24"]
+}
+
+resource "yandex_vpc_security_group" "kittygram-sg" {
+  name        = "kittygram-sg"
+  description = "Security group for Kittygram application"
+
+  network_id = yandex_vpc_network.kittygram-network.id
+
+  egress {
+    protocol = "all"
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol = "tcp"
+    port     = 22
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    protocol = "tcp"
+    port     = 80
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "yandex_compute_instance" "kittygram-vm" {
+  name        = "kittygram-vm"
+  platform_id = "standard-v1"
+  zone        = "ru-central1-b"
+
+  resources {
+    cores  = 2
+    memory = 2
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd8ubuntu2foa2hr1332e1" # Ubuntu 22.04 LTS
+      size     = 10
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.kittygram-subnet.id
+    nat       = true
+
+    security_group_ids = [yandex_vpc_security_group.kittygram-sg.id]
+  }
+
+  metadata = {
+    ssh-keys = "ubuntu:${file(var.ssh_public_key_path)}"
+    user-data = file("${path.module}/cloud-config.yaml")
+  }
+}

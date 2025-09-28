@@ -10,4 +10,34 @@ on:
         options:
           - plan
           - apply
-          - destroy 
+          - destroy
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Select Terraform action
+        id: select_action
+        run: echo "action=${{ github.event.inputs.action }}" >> $GITHUB_OUTPUT
+
+      - name: Execute Terraform action
+        run: |
+          if [ "${{ steps.select_action.outputs.action }}" == "plan" ]; then
+            terraform plan -out=tfplan
+          elif [ "${{ steps.select_action.outputs.action }}" == "apply" ]; then
+            terraform apply -auto-approve tfplan
+          elif [ "${{ steps.select_action.outputs.action }}" == "destroy" ]; then
+            terraform destroy -auto-approve
+          else
+            echo "Invalid action selected"
+            exit 1
+          fi 

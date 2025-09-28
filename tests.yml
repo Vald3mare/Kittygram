@@ -1,5 +1,6 @@
 repo_owner: Vald3mare
-kittygram_domain: http://89.169.177.176
+#kittygram_domain: http://89.169.177.176
+kittygram_domain: http://89.169.163.245 # тест terafform
 dockerhub_username: valdmar918
 
 ##

@@ -1,12 +1,13 @@
-name: Terraform
+name: Terraform Management
 
 on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Select the Terraform action'
+        description: 'Terraform Action (plan, apply, or destroy)'
         required: true
         default: 'plan'
+        type: choice
         options:
           - plan
           - apply
@@ -16,28 +17,44 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Terraform
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.3.0
 
-      - name: Initialize Terraform
-        run: terraform init
-
-      - name: Select Terraform action
-        id: select_action
-        run: echo "action=${{ github.event.inputs.action }}" >> $GITHUB_OUTPUT
-
-      - name: Execute Terraform action
+      - name: Configure Yandex.Cloud credentials
+        env:
+          YC_TOKEN: ${{ secrets.YC_TOKEN }}
         run: |
-          if [ "${{ steps.select_action.outputs.action }}" == "plan" ]; then
-            terraform plan -out=tfplan
-          elif [ "${{ steps.select_action.outputs.action }}" == "apply" ]; then
-            terraform apply -auto-approve tfplan
-          elif [ "${{ steps.select_action.outputs.action }}" == "destroy" ]; then
-            terraform destroy -auto-approve
-          else
-            echo "Invalid action selected"
-            exit 1
-          fi 
+          mkdir -p ~/.config/yandex-cloud/
+          echo "token: ${YC_TOKEN}" > ~/.config/yandex-cloud/config.yaml
+
+      - name: Terraform Init
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+        run: terraform -chdir=./infra init
+
+      - name: Terraform Plan
+        if: github.event.inputs.action == 'plan'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+        run: terraform -chdir=./infra plan -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+        run: terraform -chdir=./infra apply -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"
+
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+        run: terraform -chdir=./infra destroy -auto-approve -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}"

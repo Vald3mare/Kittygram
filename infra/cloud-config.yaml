@@ -1,12 +1,4 @@
 #cloud-config
-users:
-  - name: ubuntu
-    groups: docker
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    shell: /bin/bash
-    ssh_authorized_keys:
-      - ${ssh_public_key}
-
 package_update: true
 package_upgrade: true
 

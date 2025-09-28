@@ -31,3 +31,4 @@ dockerhub_username: ваш_логин_на_докерхабе
 Демонстрации работы сервиса на новой машине
 ![alt text](image-1.png)
 ![alt text](image-2.png)
+![alt text](image-3.png)

@@ -1,17 +1,17 @@
 terraform {
   required_providers {
     yandex = {
-      source = "yandex-cloud/yandex"
+      source  = "yandex-cloud/yandex"
       version = ">= 0.89.0"
     }
   }
 }
 
 provider "yandex" {
-  zone = "ru-central1-b"
-  cloud_id = var.cloud_id
+  zone      = "ru-central1-b"
+  token     = var.yc_token
+  cloud_id  = var.cloud_id
   folder_id = var.folder_id
-  service_account_key_file = var.service_account_key_file
 }
 
 resource "yandex_vpc_network" "kittygram-network" {
@@ -28,23 +28,22 @@ resource "yandex_vpc_subnet" "kittygram-subnet" {
 resource "yandex_vpc_security_group" "kittygram-sg" {
   name        = "kittygram-sg"
   description = "Security group for Kittygram application"
-
-  network_id = yandex_vpc_network.kittygram-network.id
+  network_id  = yandex_vpc_network.kittygram-network.id
 
   egress {
-    protocol = "all"
+    protocol       = "ANY"
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    protocol = "tcp"
-    port     = 22
+    protocol       = "TCP"
+    port           = 22
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    protocol = "tcp"
-    port     = 80
+    protocol       = "TCP"
+    port           = 80
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -67,14 +66,13 @@ resource "yandex_compute_instance" "kittygram-vm" {
   }
 
   network_interface {
-    subnet_id = yandex_vpc_subnet.kittygram-subnet.id
-    nat       = true
-
+    subnet_id          = yandex_vpc_subnet.kittygram-subnet.id
+    nat                = true
     security_group_ids = [yandex_vpc_security_group.kittygram-sg.id]
   }
 
   metadata = {
-    ssh-keys = "ubuntu:${file(var.ssh_public_key_path)}"
+    ssh-keys  = "ubuntu:${var.ssh_public_key}"
     user-data = file("${path.module}/cloud-config.yaml")
   }
 }

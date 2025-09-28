@@ -1,4 +1,4 @@
-name: Terraform Management
+name: Terraform
 
 on:
   workflow_dispatch:
